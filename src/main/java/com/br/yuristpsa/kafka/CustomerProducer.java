@@ -1,4 +1,4 @@
-package com.br.yuristpsa;
+package com.br.yuristpsa.kafka;
 
 import com.br.yuristpsa.model.Customer;
 import io.smallrye.reactive.messaging.kafka.Record;
@@ -10,12 +10,12 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 @ApplicationScoped
-public class MovieProducer {
+public class CustomerProducer {
 
-    @Inject @Channel("movies-out")
+    @Inject @Channel("customer-out")
     Emitter<Record<String, Customer>> emitter;
 
-    public void sendMovieToKafka(Customer movie) {
-        emitter.send(Record.of("1", movie));
+    public void send(Customer customer) {
+        emitter.send(Record.of(customer.getId().toString(), customer));
     }
 }

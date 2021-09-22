@@ -1,43 +1,49 @@
 package com.br.yuristpsa.resource;
 
-import com.br.yuristpsa.MovieProducer;
 import com.br.yuristpsa.model.Customer;
-import com.br.yuristpsa.repository.CustomerRepository;
+import com.br.yuristpsa.service.CustomerService;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.util.List;
 
 @Path("/customers")
 public class CustomerResource {
 
-    @Inject
-    CustomerRepository customerRepository;
+    private final CustomerService customerService;
 
-    @Inject
-    MovieProducer producer;
-
-    @POST
-    @Transactional
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void inserir(Customer customer) {
-        producer.sendMovieToKafka(customer);
-//        kafkaProducerService.publishInvalidatedContents(customer);
- //        kafkaProducerService.publishInvalidatedContents(customer);
-//        customerRepository.persist(customer);
+    public CustomerResource(CustomerService customerService) {
+        this.customerService = customerService;
     }
 
-/*    @Inject
-    MovieProducer producer;
-
     @POST
-    public Response send(Movie movie) {
-        producer.sendMovieToKafka(movie);
-        // Return an 202 - Accepted response.
-        return Response.accepted().build();
-    }*/
+    public Response create(Customer customer) {
+        Customer customerEntity = this.customerService.save(customer);
+        return Response.status(Response.Status.OK).entity(customerEntity).build();
+    }
 
+    @PUT
+    @Path("{id}")
+    public Response update(@PathParam("id") Long id, Customer customer) {
+        Customer customerUpdated = this.customerService.update(id, customer);
+        return Response.status(Response.Status.OK).entity(customerUpdated).build();
+    }
+
+    @DELETE
+    @Path("{id}")
+    public Response delete(@PathParam("id") Long id) {
+        this.customerService.delete(id);
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    @GET
+    public List<Customer> list() {
+        return this.customerService.list();
+    }
+
+    @GET
+    @Path("{id}")
+    public Customer findById(@PathParam("id") Long id) {
+        return this.customerService.findById(id);
+    }
 }
